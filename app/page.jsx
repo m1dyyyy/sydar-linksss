@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [url, setUrl] = useState('');
-  const [subdomain, setSubdomain] = useState('');
+  const [slug, setSlug] = useState('');
   const [links, setLinks] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -29,16 +29,15 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = new Response();
       const apiRes = await fetch('/api/links', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, subdomain }),
+        body: JSON.stringify({ url, subdomain: slug }), // поле в бэке остается subdomain, но передаем туда слэш/slug
       });
       const data = await apiRes.json();
       if (data.success) {
         setUrl('');
-        setSubdomain('');
+        setSlug('');
         fetchLinks();
       } else {
         alert('Ошибка: ' + data.error);
@@ -63,7 +62,7 @@ export default function Home() {
       <div style={{ background: '#111827', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '460px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.04)', border: '1px solid #1f2937' }}>
         
         <h1 style={{ fontSize: '24px', fontWeight: '700', textAlign: 'center', margin: '0 0 6px 0', letterSpacing: '-0.5px' }}>SYDAR Links</h1>
-        <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', margin: '0 0 24px 0' }}>Генератор ссылок: <span style={{ color: '#60a5fa' }}>{mainDomain}</span></p>
+        <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', margin: '0 0 24px 0' }}>Генератор ссылок: <span style={{ color: '#60a5fa' }}>{mainDomain}/</span></p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
@@ -79,17 +78,17 @@ export default function Home() {
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#9ca3af', marginBottom: '6px' }}>Желаемый поддомен</label>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#9ca3af', marginBottom: '6px' }}>Текст ссылки (путь)</label>
             <div style={{ display: 'flex', alignItems: 'center', background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', overflow: 'hidden' }}>
+              <span style={{ paddingLeft: '14px', color: '#6b7280', fontSize: '13px', userSelect: 'none' }}>/</span>
               <input
                 type="text"
-                placeholder="s1"
-                value={subdomain}
-                onChange={(e) => setSubdomain(e.target.value)}
+                placeholder="missletoo"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
                 required
-                style={{ width: '100%', padding: '12px 14px', background: 'transparent', border: 'none', color: '#fff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '12px 6px', background: 'transparent', border: 'none', color: '#fff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
               />
-              <span style={{ paddingRight: '14px', color: '#6b7280', fontSize: '13px', userSelect: 'none' }}>.{mainDomain}</span>
             </div>
           </div>
 
@@ -103,21 +102,22 @@ export default function Home() {
         </form>
       </div>
 
-      {/* Список активных поддоменов */}
+      {/* Список активных ссылок */}
       {links.length > 0 && (
         <div style={{ width: '100%', maxWidth: '460px', marginTop: '28px' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '12px', color: '#d1d5db', paddingLeft: '4px' }}>Активные поддомены</h3>
+          <h3 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '12px', color: '#d1d5db', paddingLeft: '4px' }}>Активные ссылки</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {links.map((link) => {
-              const fullSubUrl = `https://${link.subdomain}.${mainDomain}`;
+              // Формируем ссылку через слэш
+              const fullSlugUrl = `https://${mainDomain}/${link.subdomain}`;
               return (
                 <div key={link.id} style={{ background: '#111827', padding: '14px 16px', borderRadius: '12px', border: '1px solid #1f2937', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <a href={fullSubUrl} target="_blank" rel="noreferrer" style={{ fontWeight: '600', color: '#60a5fa', fontSize: '14px', textDecoration: 'none' }}>
-                      {link.subdomain}.{mainDomain}
+                    <a href={fullSlugUrl} target="_blank" rel="noreferrer" style={{ fontWeight: '600', color: '#60a5fa', fontSize: '14px', textDecoration: 'none' }}>
+                      {mainDomain}/{link.subdomain}
                     </a>
                     <button
-                      onClick={() => copyToClipboard(fullSubUrl, link.id)}
+                      onClick={() => copyToClipboard(fullSlugUrl, link.id)}
                       style={{ background: copiedId === link.id ? '#059669' : '#1f2937', color: '#fff', border: '1px solid #374151', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', fontWeight: '500' }}
                     >
                       {copiedId === link.id ? 'Скопировано!' : 'Копировать'}
