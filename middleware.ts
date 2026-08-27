@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
   const url = request.nextUrl;
   const hostname = request.headers.get('host') || '';
 
-  const currentHost = 'misss-letoo.lol';
+  const currentHost = 'votee-arts.lol';
 
   let subdomain = '';
   if (hostname.includes('.')) {
