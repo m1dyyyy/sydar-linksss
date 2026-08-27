@@ -8,13 +8,12 @@ export default async function SlugPage({ params }) {
   if (!slug || slug === 'favicon.ico') return null;
 
   try {
-    // Напрямую запрашиваем из базы данных Vercel Postgres
     const { rows } = await sql`SELECT url FROM sub_links WHERE subdomain = ${slug.toLowerCase().trim()}`;
     
     if (rows.length > 0 && rows[0].url) {
       redirect(rows[0].url);
     }
-  } x catch (err) {
+  } catch (err) {
     console.error('Ошибка редиректа:', err);
   }
 
