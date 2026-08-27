@@ -7,10 +7,12 @@ export default function Home() {
   const [links, setLinks] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  const mainDomain = 'misss-letoo.lol';
+  const [mainDomain, setMainDomain] = useState('');
 
   useEffect(() => {
+    // Автоматически определяем домен из браузера (убираем www если есть)
+    const host = window.location.hostname.replace(/^www\./, '');
+    setMainDomain(host);
     fetchLinks();
   }, []);
 
@@ -27,12 +29,13 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('/api/links', {
+      const res = new Response();
+      const apiRes = await fetch('/api/links', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, subdomain }),
       });
-      const data = await res.json();
+      const data = await apiRes.json();
       if (data.success) {
         setUrl('');
         setSubdomain('');
@@ -60,7 +63,7 @@ export default function Home() {
       <div style={{ background: '#111827', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '460px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.04)', border: '1px solid #1f2937' }}>
         
         <h1 style={{ fontSize: '24px', fontWeight: '700', textAlign: 'center', margin: '0 0 6px 0', letterSpacing: '-0.5px' }}>SYDAR Links</h1>
-        <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', margin: '0 0 24px 0' }}>Быстрый генератор ссылок с поддержкой поддоменов</p>
+        <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', margin: '0 0 24px 0' }}>Генератор ссылок: <span style={{ color: '#60a5fa' }}>{mainDomain}</span></p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
@@ -71,9 +74,7 @@ export default function Home() {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               required
-              style={{ width: '100%', padding: '12px 14px', background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff', fontSize: '14px', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
-              onFocus={(e) => e.target.style.borderColor = '#60a5fa'}
-              onBlur={(e) => e.target.style.borderColor = '#374151'}
+              style={{ width: '100%', padding: '12px 14px', background: '#1f2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
             />
           </div>
 
@@ -95,7 +96,7 @@ export default function Home() {
           <button
             type="submit"
             disabled={loading}
-            style={{ width: '100%', padding: '12px', background: '#fff', color: '#000', fontWeight: '600', border: 'none', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', marginTop: '4px', transition: 'opacity 0.2s', opacity: loading ? 0.7 : 1 }}
+            style={{ width: '100%', padding: '12px', background: '#fff', color: '#000', fontWeight: '600', border: 'none', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', marginTop: '4px', opacity: loading ? 0.7 : 1 }}
           >
             {loading ? 'Создание...' : 'Создать ссылку'}
           </button>
@@ -117,7 +118,7 @@ export default function Home() {
                     </a>
                     <button
                       onClick={() => copyToClipboard(fullSubUrl, link.id)}
-                      style={{ background: copiedId === link.id ? '#059669' : '#1f2937', color: '#fff', border: '1px solid #374151', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', fontWeight: '500', transition: 'all 0.2s' }}
+                      style={{ background: copiedId === link.id ? '#059669' : '#1f2937', color: '#fff', border: '1px solid #374151', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', fontWeight: '500' }}
                     >
                       {copiedId === link.id ? 'Скопировано!' : 'Копировать'}
                     </button>
