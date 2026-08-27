@@ -10,7 +10,6 @@ export default function Home() {
   const [mainDomain, setMainDomain] = useState('');
 
   useEffect(() => {
-    // Автоматически определяем домен из браузера (убираем www если есть)
     const host = window.location.hostname.replace(/^www\./, '');
     setMainDomain(host);
     fetchLinks();
@@ -32,7 +31,7 @@ export default function Home() {
       const apiRes = await fetch('/api/links', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, subdomain: slug }), // поле в бэке остается subdomain, но передаем туда слэш/slug
+        body: JSON.stringify({ url, subdomain: slug }),
       });
       const data = await apiRes.json();
       if (data.success) {
@@ -57,10 +56,7 @@ export default function Home() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#07090e', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', padding: '20px' }}>
-      
-      {/* Главная форма */}
       <div style={{ background: '#111827', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '460px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.04)', border: '1px solid #1f2937' }}>
-        
         <h1 style={{ fontSize: '24px', fontWeight: '700', textAlign: 'center', margin: '0 0 6px 0', letterSpacing: '-0.5px' }}>SYDAR Links</h1>
         <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', margin: '0 0 24px 0' }}>Генератор ссылок: <span style={{ color: '#60a5fa' }}>{mainDomain}/</span></p>
 
@@ -102,13 +98,11 @@ export default function Home() {
         </form>
       </div>
 
-      {/* Список активных ссылок */}
       {links.length > 0 && (
         <div style={{ width: '100%', maxWidth: '460px', marginTop: '28px' }}>
           <h3 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '12px', color: '#d1d5db', paddingLeft: '4px' }}>Активные ссылки</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {links.map((link) => {
-              // Формируем ссылку через слэш
               const fullSlugUrl = `https://${mainDomain}/${link.subdomain}`;
               return (
                 <div key={link.id} style={{ background: '#111827', padding: '14px 16px', borderRadius: '12px', border: '1px solid #1f2937', display: 'flex', flexDirection: 'column', gap: '8px' }}>
