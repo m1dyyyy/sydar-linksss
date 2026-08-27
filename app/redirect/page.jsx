@@ -1,41 +1,24 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function RedirectPage() {
+function RedirectContent() {
   const searchParams = useSearchParams();
-  const sub = searchParams.get('sub');
-  const [status, setStatus] = useState('Redirecting...');
+  const url = searchParams.get('url');
 
-  useEffect(() => {
-    if (!sub) {
-      setStatus('Ссылка не найдена');
-      return;
-    }
-
-    async function fetchTarget() {
-      try {
-        const res = await fetch('/api/links');
-        const data = await res.json();
-        const found = data.find((item) => item.subdomain === sub);
-        
-        if (found && found.url) {
-          window.location.href = found.url;
-        } else {
-          setStatus('Поддомен не существует в базе');
-        }
-      } catch (e) {
-        setStatus('Ошибка загрузки редиректа');
-      }
-    }
-
-    fetchTarget();
-  }, [sub]);
-
+  // Здесь может быть твоя логика редиректа, если она там была
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0a0a0a', color: '#fff', fontFamily: 'sans-serif', flexDirection: 'column', gap: '10px' }}>
-      <h2>{status}</h2>
-      <p style={{ color: '#666', fontSize: '14px' }}>Пожалуйста, подождите...</p>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0f172a', color: '#fff', fontFamily: 'sans-serif' }}>
+      <p>Перенаправление...</p>
     </div>
+  );
+}
+
+export default function RedirectPage() {
+  return (
+    <Suspense fallback={<div style={{ color: '#fff', background: '#0f172a', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>Загрузка...</div>}>
+      <RedirectContent />
+    </Suspense>
   );
 }
