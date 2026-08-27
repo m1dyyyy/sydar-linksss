@@ -1,15 +1,17 @@
 import { redirect } from 'next/navigation';
 
 export default async function SlugPage({ params }) {
-  const resolvedParams = await params;
-  const slug = resolvedParams.slug;
+  const { slug } = await params;
+
+  // Игнорируем технические запросы фавиконки и т.д.
+  if (!slug || slug === 'favicon.ico') return null;
 
   try {
     const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
     const res = await fetch(`${baseUrl}/api/links`, { cache: 'no-store' });
     const links = await res.json();
     
-    // Ищем совпадение (проверяем и subdomain, и slug на всякий случай)
+    // Ищем совпадение по любому полю
     const found = links.find((l) => l.subdomain === slug || l.slug === slug);
 
     if (found && found.url) {
