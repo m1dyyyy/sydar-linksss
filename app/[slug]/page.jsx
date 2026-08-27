@@ -1,23 +1,20 @@
 import { redirect } from 'next/navigation';
+import { sql } from '@vercel/postgres';
 
 export default async function SlugPage({ params }) {
-  const { slug } = await params;
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug;
 
-  // Игнорируем технические запросы фавиконки и т.д.
   if (!slug || slug === 'favicon.ico') return null;
 
   try {
-    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/links`, { cache: 'no-store' });
-    const links = await res.json();
+    // Напрямую запрашиваем из базы данных Vercel Postgres
+    const { rows } = await sql`SELECT url FROM sub_links WHERE subdomain = ${slug.toLowerCase().trim()}`;
     
-    // Ищем совпадение по любому полю
-    const found = links.find((l) => l.subdomain === slug || l.slug === slug);
-
-    if (found && found.url) {
-      redirect(found.url);
+    if (rows.length > 0 && rows[0].url) {
+      redirect(rows[0].url);
     }
-  } catch (err) {
+  } x catch (err) {
     console.error('Ошибка редиректа:', err);
   }
 
